@@ -42,3 +42,8 @@ Another idea is making it on a tester mode;
 npm run dev
 ```
 It will runs the developer's perspective, and to have a free will to see the token, item, sources, and other important files that needs to be fix.
+
+# Information
+
+## About
+    the Information System for Basic Education is made for the educators (exclusively).
