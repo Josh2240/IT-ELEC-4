@@ -1,0 +1,21 @@
+{
+  "name": "it-elec-4",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "npm --workspace backend run dev",
+    "dev:frontend": "npm --workspace frontend run dev",
+    "build": "npm --workspace frontend run build",
+    "start": "node ./scripts/start.js",
+    "start:local": "npm --workspace backend run start",
+    "preview": "npm --workspace frontend run preview"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
