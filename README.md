@@ -47,3 +47,32 @@ It will runs the developer's perspective, and to have a free will to see the tok
 
 ## About
     the Information System for Basic Education is made for the educators (exclusively).
+
+# ADDITIONAL:
+ - in .env.example, the;
+
+```
+ DB_HOST=db
+DB_USER=root
+DB_PASS=example
+DB_NAME=pclu_employee_db
+DB_PORT=3306
+JWT_SECRET=change-this-secret-in-production
+PORT=4000
+```
+
+```changes to
+
+DB_HOST=localhost
+   DB_USER=root
+   DB_PASS=example
+   DB_NAME=pclu_employee_db
+   PORT=4000
+   ```
+
+   :this is to retry the frontend, and backend to see the overview result of the system.
+
+   :if this is not working, the old command of .env.example must be at the file, not the new one
+
+   # FIRST TRY: 
+    - not working
