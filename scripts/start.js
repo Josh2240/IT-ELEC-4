@@ -1,57 +1,27 @@
-const { spawnSync, spawn } = require('child_process');
-const path = require('path');
+const { spawn } = require('child_process');
 
-function checkDockerCompose() {
-  // Try `docker compose version` first
-  try {
-    const r = spawnSync('docker', ['compose', 'version'], { stdio: 'ignore' });
-    if (r.status === 0) return { cmd: 'docker', args: ['compose', 'up', '--build'] };
-  } catch (e) {}
+console.log('Starting backend and frontend locally.');
+const isWindows = process.platform === 'win32';
+const npm = isWindows ? 'npm.cmd' : 'npm';
+const shell = isWindows ? 'cmd.exe' : '/bin/sh';
+const shellArgs = isWindows ? ['/d', '/s', '/c'] : ['-c'];
 
-  // Fallback to `docker-compose` if available
-  try {
-    const r2 = spawnSync('docker-compose', ['version'], { stdio: 'ignore' });
-    if (r2.status === 0) return { cmd: 'docker-compose', args: ['up', '--build'] };
-  } catch (e) {}
+const backend = spawn(shell, [...shellArgs, `${npm} --workspace backend run dev`], { stdio: 'inherit', shell: false });
+const frontend = spawn(shell, [...shellArgs, `${npm} --workspace frontend run dev`], { stdio: 'inherit', shell: false });
 
-  return null;
-}
+launchBrowserWhenReady();
 
-const dockerCmd = checkDockerCompose();
-if (dockerCmd) {
-  console.log('Docker detected — starting services with Docker Compose.');
-  // Try a synchronous up first so we can catch failures like name conflicts
-  try {
-    const sync = spawnSync(dockerCmd.cmd, dockerCmd.args, { stdio: 'inherit' });
-    if (sync.status === 0) {
-      // Containers started; attempt to open the app in the browser
-      launchBrowserWhenReady();
-      process.exit(0);
-    }
-    console.error('Docker Compose up failed with code', sync.status, '. Attempting `docker compose down` and retrying.');
-
-    // run `down` to clear leftover containers
-    const downArgs = dockerCmd.cmd === 'docker' ? ['compose', 'down'] : ['down'];
-    spawnSync(dockerCmd.cmd, downArgs, { stdio: 'inherit' });
-
-    // Re-run up in attached mode
-    const p = spawn(dockerCmd.cmd, dockerCmd.args, { stdio: 'inherit' });
-    // When running attached, start a background watcher to open the browser when services are ready
-    launchBrowserWhenReady();
-    p.on('close', (code) => process.exit(code));
-  } catch (e) {
-    console.error('Failed to run Docker Compose:', e);
-    process.exit(1);
+backend.on('close', (code) => {
+  if (code !== 0) {
+    process.exit(code || 1);
   }
-} else {
-  console.log('Docker Compose not found — starting backend and frontend locally.');
-  // Run both backend and frontend concurrently using npm run dev
-  const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-  const p = spawn(npm, ['run', 'dev'], { stdio: 'inherit' });
-  // Start watcher to open browser when local services respond
-  launchBrowserWhenReady();
-  p.on('close', (code) => process.exit(code));
-}
+});
+
+frontend.on('close', (code) => {
+  if (code !== 0) {
+    process.exit(code || 1);
+  }
+});
 
 function launchBrowserWhenReady() {
   const urlsToTry = [
